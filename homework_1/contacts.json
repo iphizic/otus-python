@@ -1,0 +1,32 @@
+[
+    {
+        "id": 0,
+        "name": "Chuck",
+        "number": "8 800 555 35 35",
+        "comment": ""
+    },
+    {
+        "id": 1,
+        "name": "Norris",
+        "number": "8 800 999 88 77",
+        "comment": ""
+    },
+    {
+        "id": 2,
+        "name": "Clare",
+        "number": "8 800 999 44 22",
+        "comment": ""
+    },
+    {
+        "id": 3,
+        "name": "Claire",
+        "number": "8 999 111 22 33",
+        "comment": ""
+    },
+    {
+        "id": 4,
+        "name": "Clare",
+        "number": "8 999 888 77 66",
+        "comment": ""
+    }
+]
