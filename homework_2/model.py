@@ -57,6 +57,19 @@ class ContactDatabase:
         return str(self._contact_list)
 
 
+    def __iter__(self):
+        self.index = 0
+        return self
+
+
+    def __next__(self):
+        if self.index < len(self._contact_list):
+            x = self._contact_list[self.index]
+            self.index += 1
+            return x
+        raise StopIteration
+
+
     def add_contact(self, id: int, name, phone, comment: str) -> None:
         self._contact_list[id] = Contact(name, phone, comment)
 
