@@ -18,11 +18,11 @@ class Contact:
 
     @property
     def name(self):
-        return self._comment
+        return self._name
 
 
     @property
-    def comment(self):
+    def comment(self) -> str:
         return self._comment
 
 
