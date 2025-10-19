@@ -3,50 +3,45 @@ from pathlib import Path
 from view import *
 import urwid
 
-def item_chosen(contact: Contact, loop, button):
-    palette = [('I say', 'default,bold', 'default', 'bold'), ]
-    div = urwid.Divider()
-
-    contact_name = urwid.Edit(('I say', u"Please enter contact name?\n"))
-    contact_number = urwid.Edit(('I say', u"Please enter contact number?\n"))
-    contact_comment = urwid.Edit(('I say', u"Please enter contact comment?\n"))
-    button_add = urwid.Button(u'Add')
-    button_delete = urwid.Button(u'Delete')
-
-    contact_name.set_edit_text(contact.name)
-    contact_number.set_edit_text(contact.phone)
-    contact_comment.set_edit_text(contact.comment)
-
-    pile = urwid.Pile([contact_name,
-                       div,
-                       contact_number,
-                       div,
-                       contact_comment,
-                       div,
-                       button_add,
-                       button_delete])
-    urwid.connect_signal(button_add, 'click', add_contact, user_args=[contact, loop])
-    urwid.connect_signal(button_delete, 'click', del_contact, user_args=[contact, loop])
-    loop.widget = urwid.Filler(pile, valign='top')
-
-def del_contact(choice, button: urwid.Button):
-  pass
+def del_contact(choice, db, loop, button: urwid.Button):
+    db.delete_contact(choice)
+    menu_widget(db, loop, item_chosen, menu)
 
 
-def add_contact(contact, button):
-    pass
+def add_contact(name: urwid.Edit,
+                number: urwid.Edit,
+                comment: urwid.Edit,
+                contact,
+                db: ContactDatabase,
+                loop,
+                button: urwid.Button):
+    if contact is None:
+        db.add_new_contact(name.get_edit_text(), number.get_edit_text(),comment.get_edit_text())
+    else:
+        db.get_contact_by_id(contact).name = name.get_edit_text()
+        db.get_contact_by_id(contact).phone = number.get_edit_text()
+        db.get_contact_by_id(contact).comment = comment.get_edit_text()
+
+    menu_widget(db, loop, item_chosen, menu)
 
 
 def menu(title: str, db, item_chosen, loop) -> urwid.ListBox:
     body = [urwid.Text(title), urwid.Divider()]
 
-    for contact in db:
+    for cont_id, contact in db:
         button = urwid.Button(contact.name)
-        urwid.connect_signal(button, "click", item_chosen, user_args=[contact, loop])
+        urwid.connect_signal(button, "click", item_chosen, user_args=[cont_id,
+                                                                      db,
+                                                                      loop,
+                                                                      add_contact,
+                                                                      del_contact,
+                                                                      contact.name,
+                                                                      contact.phone,
+                                                                      contact.comment
+                                                                      ])
         body.append(urwid.AttrMap(button, None, focus_map="reversed"))
 
     return urwid.ListBox(urwid.SimpleFocusListWalker(body))
-
 
 def main_menu(button: urwid.Button, loop, contacts_file):
 
@@ -57,17 +52,15 @@ def main_menu(button: urwid.Button, loop, contacts_file):
         with open(contacts_file, "r") as f:
             db = ContactDatabase.load_from_json(f)
 
-    form = urwid.Padding(menu("Contacts (press a to add, q to quit, f to search)", db, item_chosen, loop), left=2, right=2)
-    loop.widget = urwid.Overlay(
-        form,
-        urwid.SolidFill(" "),
-        align=urwid.LEFT,
-        width=(urwid.RELATIVE, 60),
-        valign=urwid.MIDDLE,
-        height=(urwid.RELATIVE, 60),
-        min_width=20,
-        min_height=9,
-    )
+    menu_widget(db, loop, item_chosen, menu)
+
+
+def add_or_quit(key):
+    if key in ('q', 'Q'):
+        with open(contacts_file, "w") as f:
+            json.dump(contacts, f, indent=4, ensure_ascii=False)
+        raise urwid.ExitMainLoop()
+
 
 def main():
     # db = None
@@ -80,7 +73,7 @@ def main():
     # else:
     #     with open(contacts_file, "r") as f:
     #         db = ContactDatabase.load_from_json(f)
-    loop = urwid.MainLoop(urwid.Filler(urwid.Text("")))
+    loop = urwid.MainLoop(urwid.Filler(urwid.Text(""), valign='top'))
     loop.widget = file_question("./contacts.json", main_menu, loop)
 
     loop.run()

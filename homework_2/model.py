@@ -59,14 +59,16 @@ class ContactDatabase:
 
     def __iter__(self):
         self.index = 0
+        self._ids = list(self._contact_list)
         return self
 
 
     def __next__(self):
-        if self.index < len(self._contact_list):
-            x = self._contact_list[self.index]
+        if self.index < len(self._ids):
+            contact_id = self._ids[self.index]
+            x = self._contact_list[contact_id]
             self.index += 1
-            return x
+            return contact_id, x
         raise StopIteration
 
 
@@ -113,9 +115,16 @@ class ContactDatabase:
 
         return list
 
+    def delete_contact(self, id):
+        del self._contact_list[id]
+
 
     def clean(self):
         self._contact_list = {}
+
+
+    def load_to_json(self) -> str:
+        pass
 
 
     @classmethod
