@@ -50,7 +50,6 @@ def menu_widget(db, loop, callback, menu):
 def file_question(default, callback, loop) -> urwid.Filler:
     ask = urwid.Edit( u"Please enter file name?\n", default)
     button = urwid.Button(u'Go')
-    #urwid.connect_signal(button, 'click')
     div = urwid.Divider()
     pile = urwid.Pile([ask, div, button])
     top = urwid.Filler(pile, valign='top')
@@ -77,4 +76,27 @@ def add_contact_form(callback) -> urwid.Widget:
                                                                       None])
 
     return urwid.Filler(pile, valign='top')
+
+def find_menu(loop, find):
+    body = [urwid.Text(u"Find by"), urwid.Divider()]
+    items = ["name", "number", "comment"]
+    for c in items:
+        button = urwid.Button(c)
+        urwid.connect_signal(button, "click", find_by_menu, user_args=[c, loop, find])
+        body.append(urwid.AttrMap(button, None, focus_map="reversed"))
+
+    return urwid.ListBox(urwid.SimpleFocusListWalker(body))
+
+
+def find_by_menu(field: str, loop, find, button: urwid.Button):
+    find_item = urwid.Edit(f"Enter field {field} content\n")
+    div = urwid.Divider()
+    button_search = urwid.Button(u"Search")
+    form = urwid.Pile([find_item,
+                       div,
+                       button_search])
+    urwid.connect_signal(button_search, 'click', find, user_args=[field, find_item, loop])
+    loop.widget = urwid.Filler(form, valign='top')
+
+
 

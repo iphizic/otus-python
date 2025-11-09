@@ -43,14 +43,11 @@ class Contact:
 
 class ContactDatabase:
     instance = None
+    _contact_list = {}
     def __new__(cls):
         if cls.instance is None:
             cls.instance = super(ContactDatabase, cls).__new__(cls)
         return cls.instance
-
-
-    def __init__(self):
-        self._contact_list = {}
 
 
     def __str__(self):
@@ -78,7 +75,7 @@ class ContactDatabase:
 
     def add_new_contact(self, name, phone, comment: str) -> None:
         id = 0
-        id_list = [id for id, _ in self._contact_list]
+        id_list = list(self._contact_list)
         while id in id_list:
             id += 1
 
@@ -89,31 +86,34 @@ class ContactDatabase:
         return self._contact_list[id]
 
 
-    def search_contacts_by_name(self, val) -> dict:
-        list = {}
-        for k, v in self._contact_list:
+    def search_contacts_by_name(self, val) -> list:
+        list = []
+        for k, v in self._contact_list.items():
             if val in v.name:
-                list[k] = v
+                list.append(k)
 
         return list
 
 
-    def search_contacts_by_phone(self, val) -> dict:
-        list = {}
-        for k, v in self._contact_list:
+    def search_contacts_by_phone(self, val) -> list:
+        list = []
+        for k, v in self._contact_list.items():
             if val in v.phone:
-                list[k] = v
+                list.append(k)
 
         return list
 
 
-    def search_contacts_by_comment(self, val) -> dict:
-        list = {}
-        for k, v in self._contact_list:
+    def search_contacts_by_comment(self, val) -> list:
+        list = []
+        for k, v in self._contact_list.items():
             if val in v.comment:
-                list[k] = v
+                list.append(k)
 
         return list
+
+    def contact_id_list(self):
+        return list(self._contact_list)
 
     def delete_contact(self, id):
         del self._contact_list[id]
@@ -123,8 +123,12 @@ class ContactDatabase:
         self._contact_list = {}
 
 
-    def load_to_json(self) -> str:
-        pass
+    def load_to_json(self, file) -> None:
+        db_map=[]
+        for k, v in self._contact_list.items():
+            db_map.append({"id": k, "name": v.name, "number": v.phone, "comment": v.comment})
+
+        return json.dump(db_map, file, indent=4, ensure_ascii=False)
 
 
     @classmethod
