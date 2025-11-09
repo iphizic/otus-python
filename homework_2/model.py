@@ -1,5 +1,10 @@
 import json
 
+
+class InvalidFileException(Exception):
+    def __init__(self):
+        super().__init__(f"Файл поврежден.")
+
 class Contact:
     def __init__(self, name, phone, comment):
         self._name = name
@@ -133,10 +138,11 @@ class ContactDatabase:
 
     @classmethod
     def load_from_json(cls, json_text):
-        data = json.load(json_text)
-        if cls.instance is None:
-            cls()
-        db = cls.instance
+        try:
+            data = json.load(json_text)
+        except Exception:
+            raise InvalidFileException
+        db = cls()
         db.clean()
         for i in data:
             db.add_contact(i["id"], i["name"], i["number"], i["comment"])
