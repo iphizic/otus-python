@@ -2,6 +2,7 @@ import urwid
 
 
 def item_chosen(contact, db, loop, add_callback, del_callback, name, phone, comment, button):
+    """Form for edit contact"""
     palette = [('I say', 'default,bold', 'default', 'bold'), ]
     div = urwid.Divider()
 
@@ -34,6 +35,7 @@ def item_chosen(contact, db, loop, add_callback, del_callback, name, phone, comm
 
 
 def menu_widget(db, loop, callback, menu):
+    """Main menu form with list contacts"""
     form = urwid.Padding(menu("Contacts (press a to add, q to quit, f to search)", db, callback, loop), left=2,
                          right=2)
     loop.widget = urwid.Overlay(
@@ -48,6 +50,7 @@ def menu_widget(db, loop, callback, menu):
     )
 
 def file_question(default, callback, loop) -> urwid.Filler:
+    """Form with contacts file path question"""
     ask = urwid.Edit( u"Please enter file name?\n", default)
     button = urwid.Button(u'Go')
     div = urwid.Divider()
@@ -57,6 +60,7 @@ def file_question(default, callback, loop) -> urwid.Filler:
     return top
 
 def add_contact_form(callback) -> urwid.Widget:
+    """Form for adding contact"""
     palette = [('I say', 'default,bold', 'default', 'bold'), ]
     contact_name = urwid.Edit(('I say', u"Please enter contact name?\n"))
     contact_number = urwid.Edit(('I say', u"Please enter contact number?\n"))
@@ -78,6 +82,7 @@ def add_contact_form(callback) -> urwid.Widget:
     return urwid.Filler(pile, valign='top')
 
 def find_menu(loop, find):
+    """Find by selector"""
     body = [urwid.Text(u"Find by"), urwid.Divider()]
     items = ["name", "number", "comment"]
     for c in items:
@@ -89,6 +94,7 @@ def find_menu(loop, find):
 
 
 def find_by_menu(field: str, loop, find, button: urwid.Button):
+    """Find by query"""
     find_item = urwid.Edit(f"Enter field {field} content\n")
     div = urwid.Divider()
     button_search = urwid.Button(u"Search")

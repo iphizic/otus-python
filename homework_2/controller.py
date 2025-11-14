@@ -6,9 +6,9 @@ from pathlib import Path
 from view import *
 import urwid
 
-contacts_file = ""
 
 def del_contact(choice, db, loop, button: urwid.Button):
+    """Delete contact from db"""
     if choice is not None:
         db.delete_contact(choice)
     menu_widget(db, loop, item_chosen, menu)
@@ -21,6 +21,7 @@ def add_contact(name: urwid.Edit,
                 db: ContactDatabase,
                 loop,
                 button: urwid.Button):
+    """Add new or edit exist contact"""
     if contact is None:
         db.add_new_contact(name.get_edit_text(), number.get_edit_text(),comment.get_edit_text())
     else:
@@ -32,12 +33,11 @@ def add_contact(name: urwid.Edit,
 
 
 def menu(title: str, db, item_chosen, loop, choices=[], find=False) -> urwid.ListBox:
+    """Renderer main contacts list"""
     body = [urwid.Text(title), urwid.Divider()]
-    if not find:
-        choices = db.contact_id_list()
 
     for cont_id, contact in db:
-        if cont_id in choices:
+        if cont_id in choices or not find:
             button = urwid.Button(contact.name)
             urwid.connect_signal(button, "click", item_chosen, user_args=[cont_id,
                                                                           db,
@@ -53,23 +53,25 @@ def menu(title: str, db, item_chosen, loop, choices=[], find=False) -> urwid.Lis
     return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 
 def main_menu(button: urwid.Button, loop, file):
-    global contacts_file
-    contacts_file = file
-    file_path = Path(contacts_file)
+    """Database loader for run main menu"""
+
+    file_path = Path(file)
+    db = None
     if not file_path.exists():
         db = ContactDatabase.load_from_json("[]")
     else:
-        with open(contacts_file, "r") as f:
+        with open(file, "r") as f:
             db = ContactDatabase.load_from_json(f)
 
+    db.contacts_file_name = file
     menu_widget(db, loop, item_chosen, menu)
 
 
 def add_or_quit(key, loop):
-    global contacts_file
+    """Keypress handler"""
     db = ContactDatabase()
     if key in ('q', 'Q'):
-        with open(contacts_file, "w") as f:
+        with open(db.contacts_file_name, "w") as f:
             db.load_to_json(file=f)
         raise urwid.ExitMainLoop()
     elif key in ('a', 'A'):
@@ -90,6 +92,7 @@ def add_or_quit(key, loop):
         )
 
 def find_by(field: str, content: urwid.Edit, loop, button: urwid.Button):
+    """Finded contacts renderer"""
     db = ContactDatabase()
     search_res =[]
 
